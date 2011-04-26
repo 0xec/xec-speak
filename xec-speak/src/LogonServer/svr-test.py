@@ -4,7 +4,7 @@
 from socket import *
 
 if __name__ == '__main__':
-    #for i in range(1, 9999):
+    for i in range(1, 9999):
         usr = '%-32s' % ('xx')
         pwd = '%-32s' % ('yy')
         data = '\x00\x01' + usr + pwd

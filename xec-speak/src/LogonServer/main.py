@@ -4,17 +4,13 @@
 Created on 2011-4-21
 @author: xec
 '''
-import SocketServer
 from common.xec_tcpsvr import *
 from common.logger import *
-
-config_file = 'config.conf'
 
 # code
 
 listen_host = ''
 listen_port = 0
-server = []
 
 class LogonServerHandler(SocketServer.StreamRequestHandler):
     
@@ -26,14 +22,12 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
     # verify version
     def auth_version(self):
         version = self.rfile.read(2)
-        print len(version)
-        for i in range(0, len(version)):
-            print version[i]
+                    
         ret = (version == '\x00\x01')
         if not ret:
-            logger('unknow version %d.%d' % (ord(version[1]), ord(version[0])))  
+            logger(__name__, 'unknow version %d.%d' % (ord(version[1]), ord(version[0])))  
         else:
-            logger('check version %d.%d' % (ord(version[1]), ord(version[0]))) 
+            logger(__name__, 'check version %d.%d' % (ord(version[1]), ord(version[0]))) 
             
         return ret
     
@@ -43,43 +37,47 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
     
     
     def handle(self):
-       
-        while True:
             
-            logger('request accept : %s:%d' % (self.client_address[0], self.client_address[1]))
+        try:
+            # verifier version
+            if not self.auth_version():
+                return
             
-            try:
-                # verifier version
-                if not self.auth_version():
-                    #return 
-                    pass
-                    
-                # 验证账户密码
-                usr = self.rfile.read(32)
-                pwd = self.rfile.read(32)
+            logger(__name__, 'request accept : %s:%d' % (self.client_address[0], self.client_address[1]))
                 
-                if not self.auth_logonuser(usr, pwd):
-                    return
-                
-                # make session key
-                
-                # put sesssion key to main server
-                
-                # send session, chat server to client
-               
-                logger('requect process finish')
+            # 验证账户密码
+            usr = self.rfile.read(32)
+            pwd = self.rfile.read(32)
+            if not self.auth_logonuser(usr, pwd):
+                return
+            
+            # make session key
+            
+            # put sesssion key to main server
+            
+            # send session, chat server to client
+           
+            logger(__name__, 'requect process finish')
 
-            except Exception, err:
-                logger(str(err).decode('gbk'))
+        except Exception, err:
+            self.request.close()
+            logger(__name__, str(err).decode('gbk'))
+                
+        logger(__name__, 'requect close')
             
     def finish(self):
-        print 'finish'
+        logger(__name__, 'client disconnect...')
 
 # global functions
 def main():
-    logger('Logon Server Starting....')
-    start_listen_thread(LogonServerHandler, '', 5000)
-    logger('Logon Server Exit.')
+    logger(__name__, 'Logon Server Starting....')
+    
+    # 读取配置文件
+    listen_host = read_conf_file('config', 'host')
+    listen_port = int(read_conf_file('config', 'port'))
+    
+    start_listen_thread(LogonServerHandler, listen_host, listen_port)
+    logger(__name__, 'Logon Server Exit.')
         
 if __name__ == '__main__':
     main()
