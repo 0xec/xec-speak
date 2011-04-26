@@ -10,6 +10,8 @@ from common.logger import *
 listen_host = ''
 listen_port = 0
 
+session_list = {}
+
 class SessionServer(SocketServer.StreamRequestHandler):
     
     def __init__(self, request, client_address, server):
@@ -17,8 +19,51 @@ class SessionServer(SocketServer.StreamRequestHandler):
         self.disable_nagle_algorithm = True        
         SocketServer.StreamRequestHandler.__init__(self, request, client_address, server)
         
+    def put_session(self):
+        global session_list
         
-    def handle(self):                
+        session_key = self.rfile.read(32).strip()
+        username    = self.rfile.read(32).strip()
+        password    = self.rfile.read(32).strip()
+        
+        logger(__file__, 'put session [%s:%s:%s]' % (session_key, username, password))
+        
+        session_item = {};
+        session_item['key'] = session_key
+        session_item['usr'] = username
+        session_item['pwd'] = password
+        
+        session_list[session_key] = session_item
+        
+    def query_session(self):
+        
+        session_key = self.rfile.read(32).strip()
+        logger(__file__, 'query session [%s]' % (session_key))
+        session_item = session_list[session_key]
+        if session_item == None:
+            return False
+        if session_key != session_item['key']:
+            return False
+        
+        return True
+        
+    def handle(self):  
+        
+        cmd = self.rfile.read(5)            # 命令
+        
+        if cmd == None or len(cmd) == 0:
+            return
+        
+        if cmd.startswith('PUTSS'):         # 添加session到list
+            self.put_session()
+        elif cmd.startswith('QUERY'):
+            if self.query_session():
+                self.wfile.write('TRUE ')
+            else:
+                self.wfile.write('FALSE')
+        else:
+            pass
+                      
         logger(__file__, 'requect close')
             
     def finish(self):

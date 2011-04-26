@@ -48,7 +48,25 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         return (self.uid != 'FAILD' and self.uid != None)  
     
     def make_session_key(self):
+        '''生成 session key'''
         return uuid.uuid1().get_hex()
+    
+    def put_session_to_server(self, session, usr, pwd):
+        '''发送 session 到服务器'''
+        data = 'PUTSS%-32s%-32s%-32s' % (session, usr, pwd)  
+        
+        self.db_host = read_conf_file('logonServer', 'sessionsvr_host')
+        self.db_port = int(read_conf_file('logonServer', 'sessionsvr_port'))
+        
+        self.dbconn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.dbconn.settimeout(2)
+
+        self.dbconn.connect((self.db_host, self.db_port))
+        self.dbconn.send(data)
+        ret = self.dbconn.recv(5)
+        self.dbconn.close()
+        
+        return (ret == 'TRUE ')
         
     
     def handle(self):
@@ -67,10 +85,10 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
                 return
             
             # make session key
-            logger(__file__,)
-                       
+            session_key = self.make_session_key()               
             
             # put sesssion key to main server
+            self.put_session_to_server(session_key, usr, pwd)
             
             # send session, chat server to client
            
