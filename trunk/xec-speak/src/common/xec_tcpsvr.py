@@ -27,7 +27,7 @@ def start_listen_thread(ServerHandler, host, port):
     '''启动服务器线程'''
     global server
     
-    logger(__name__, 'Server Work ' + host + ':' + str(port))
+    logger(__file__, 'Server Work ' + host + ':' + str(port))
     
     # start listen socket
     try:
@@ -39,7 +39,7 @@ def start_listen_thread(ServerHandler, host, port):
         
     except Exception, data:
         error = str(data)
-        logger(__name__, error.decode('gbk'))
+        logger(__file__, error.decode('gbk'))
         
 if __name__ == '__main__':
     pass

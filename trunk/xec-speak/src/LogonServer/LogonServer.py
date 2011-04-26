@@ -24,13 +24,13 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
     def auth_version(self):
         version = self.rfile.read(2)
                     
-        ret = (self.version == '\x00\x01')
+        ret = (version == '\x00\x01')
         if not ret:
-            logger(__name__, 'unknow version %d.%d' % (ord(version[1]), ord(version[0])))  
+            logger(__file__, 'unknow version %d.%d' % (ord(version[1]), ord(version[0])))  
         else:
-            logger(__name__, 'check version %d.%d' % (ord(version[1]), ord(version[0]))) 
+            logger(__file__, 'check version %d.%d' % (ord(version[1]), ord(version[0]))) 
             
-        return self.ret
+        return ret
     
     def auth_logonuser(self, username, password):
         '''验证用户名和密码是否合法'''
@@ -45,7 +45,7 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         self.uid = self.dbconn.recv(5)
         self.dbconn.close()
         
-        return (self.uid == 'FAILD')  
+        return (self.uid != 'FAILD' and self.uid != None)  
     
     def make_session_key(self):
         return uuid.uuid1().get_hex()
@@ -58,7 +58,7 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
             if not self.auth_version():
                 return
             
-            logger(__name__, 'request accept : %s:%d' % (self.client_address[0], self.client_address[1]))
+            logger(__file__, 'request accept : %s:%d' % (self.client_address[0], self.client_address[1]))
                 
             # 验证账户密码
             usr = self.rfile.read(32).strip()
@@ -67,36 +67,37 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
                 return
             
             # make session key
+            logger(__file__,)
                        
             
             # put sesssion key to main server
             
             # send session, chat server to client
            
-            logger(__name__, 'requect process finish')
+            logger(__file__, 'requect process finish')
 
         except Exception, err:
             self.request.close()
-            logger(__name__, str(err).decode('gbk'))
+            logger(__file__, str(err).decode('gbk'))
                 
-        logger(__name__, 'requect close')
+        logger(__file__, 'requect close')
             
     def finish(self):
-        logger(__name__, 'client disconnect...')
+        logger(__file__, 'client disconnect...')
 
 # global functions
 def main():
     global listen_host
     global listen_port
     
-    logger(__name__, 'Logon Server Starting....')
+    logger(__file__, 'Logon Server Starting....')
     
     # 读取配置文件
     listen_host = read_conf_file('logonServer', 'host')
     listen_port = int(read_conf_file('logonServer', 'port'))
     
     start_listen_thread(LogonServerHandler, listen_host, listen_port)
-    logger(__name__, 'Logon Server Exit.')
+    logger(__file__, 'Logon Server Exit.')
         
 if __name__ == '__main__':
     main()

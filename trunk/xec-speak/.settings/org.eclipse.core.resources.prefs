@@ -1,6 +1,7 @@
-#Tue Apr 26 13:25:56 CST 2011
+#Tue Apr 26 15:46:21 CST 2011
 eclipse.preferences.version=1
-encoding//src/DBServer/main.py=utf-8
-encoding//src/LogonServer/main.py=utf-8
+encoding//src/DBServer/DBServer.py=utf-8
+encoding//src/LogonServer/LogonServer.py=utf-8
 encoding//src/LogonServer/svr-test.py=utf-8
+encoding//src/SessionServer/SessionServer.py=utf-8
 encoding//src/common/xec_tcpsvr.py=utf-8
