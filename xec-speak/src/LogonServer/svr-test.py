@@ -11,4 +11,10 @@ if __name__ == '__main__':
         sockobj = socket(AF_INET, SOCK_STREAM)
         sockobj.connect(('localhost', 8400) )
         sockobj.send(data)
+        sess = sockobj.recv(74)
+        print sess
+        cmd         = sess[:5].strip()
+        session_key = sess[5:37].strip()
+        hall_host   = sess[37:70].strip()
+        hall_port   = int(sess[70:75].strip())
         sockobj.close() 
