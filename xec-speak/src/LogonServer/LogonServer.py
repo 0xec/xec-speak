@@ -7,6 +7,10 @@ from common.logger import *
 import socket
 import md5
 import uuid
+import json
+
+json_enc = json.JSONEncoder()
+json_dec = json.JSONDecoder()
 
 # code
 
@@ -21,14 +25,13 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         SocketServer.StreamRequestHandler.__init__(self, request, client_address, server)
     
     # verify version
-    def auth_version(self):
-        version = self.rfile.read(2)
-                    
-        ret = (version == '\x00\x01')
+    def auth_version(self, ver):
+                   
+        ret = (ver == 1.0)
         if not ret:
-            logger(__file__, 'unknow version %d.%d' % (ord(version[1]), ord(version[0])))  
+            logger(__file__, 'unknow version %.1f' % (ver))  
         else:
-            logger(__file__, 'check version %d.%d' % (ord(version[1]), ord(version[0]))) 
+            logger(__file__, 'check version %.1f' % (ver))  
             
         return ret
     
@@ -39,13 +42,24 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         
         dbconn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         dbconn.settimeout(2)
-
+        
+        query_info = {}
+        query_info['Request'] = 'Logon'
+        query_info['usr'] = username
+        query_info['pwd'] = password
+        
+        data = json_enc.encode(query_info)
+        
+        print 'Query Database %s' % (data)
+        
         dbconn.connect((db_host, db_port))
-        dbconn.send('LOGON%-32s%-32s' % (username, password))
-        uid = dbconn.recv(5)
+        dbconn.send(data)
+        DBRecv = dbconn.recv(1024)
         dbconn.close()
         
-        return (uid != 'FAILD' and uid != None)  
+        DB_Response = json_dec.decode(DBRecv)
+        
+        return (DB_Response['Response'] == True and DB_Response['uid'] != None)  
     
     def make_session_key(self):
         '''生成 session key'''
@@ -53,7 +67,15 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
     
     def put_session_to_server(self, session, usr, pwd):
         '''发送 session 到服务器'''
-        data = 'PUTSS%-32s%-32s%-32s' % (session, usr, pwd)  
+        info = {}
+        info['Request'] = 'put_session'
+        info['session'] = session
+        info['usr'] = usr
+        info['pwd'] = pwd
+        
+        data = json_enc.encode(info)
+        
+        print 'Put Session %s' % (data)
         
         session_host = read_conf_file('logonServer', 'sessionsvr_host')
         session_port = int(read_conf_file('logonServer', 'sessionsvr_port'))
@@ -63,32 +85,47 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
 
         session_svr.connect((session_host, session_port))
         session_svr.send(data)
-        ret = session_svr.recv(5)
+        data_response = session_svr.recv(1024)
         session_svr.close()
         
-        return (ret == 'TRUE ')
+        print 'Put Result %s' % (data_response)
+        
+        rep = json_dec.decode(data_response)
+        
+        return (rep['Response'] == True)
     
     def send_session_to_client(self, session):
         '''发送Session 和 Hall 服务器IP地址到 Client '''
         hall_ip   = read_conf_file('logonServer', 'HallIP')
         hall_port = int(read_conf_file('logonServer', 'HallPort'))
-        data = '%-5s%-32s%-32s%5d' % ('REPON', session, hall_ip, hall_port)
-        self.wfile.write(data)
+        
+        info = {}
+        info['Response'] = True
+        info['HallHost'] = hall_ip
+        info['HallPort'] = hall_port
+        info['Session']  = session
+        
+        data = json_enc.encode(info)
+        self.request.send(data)
         
     
     def handle(self):
             
         try:
+            data = self.request.recv(1024)
+            request_info = json_dec.decode(data)
             # verifier version
-            if not self.auth_version():
+            if not self.auth_version(request_info['ver']):
                 return
             
             logger(__file__, 'request accept : %s:%d' % (self.client_address[0], self.client_address[1]))
                 
             # 验证账户密码
-            usr = self.rfile.read(32).strip()
-            pwd = self.rfile.read(32).strip()
-            if not self.auth_logonuser(usr, md5.new(pwd).hexdigest()):
+            usr = request_info['usr']
+            pwd = request_info['pwd']
+            
+            pwd = md5.new(pwd).hexdigest()
+            if not self.auth_logonuser(usr, pwd):
                 return
             
             # make session key
