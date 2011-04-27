@@ -50,8 +50,6 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         
         data = json_enc.encode(query_info)
         
-        print 'Query Database %s' % (data)
-        
         dbconn.connect((db_host, db_port))
         dbconn.send(data)
         DBRecv = dbconn.recv(1024)
@@ -74,9 +72,7 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         info['pwd'] = pwd
         
         data = json_enc.encode(info)
-        
-        print 'Put Session %s' % (data)
-        
+                
         session_host = read_conf_file('logonServer', 'sessionsvr_host')
         session_port = int(read_conf_file('logonServer', 'sessionsvr_port'))
         
@@ -87,9 +83,7 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         session_svr.send(data)
         data_response = session_svr.recv(1024)
         session_svr.close()
-        
-        print 'Put Result %s' % (data_response)
-        
+                
         rep = json_dec.decode(data_response)
         
         return (rep['Response'] == True)
