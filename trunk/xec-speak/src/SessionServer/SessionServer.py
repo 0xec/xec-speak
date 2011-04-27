@@ -56,6 +56,8 @@ class SessionServer(SocketServer.StreamRequestHandler):
         
         if cmd.startswith('PUTSS'):         # 添加session到list
             self.put_session()
+            self.wfile.write('TRUE ')
+            
         elif cmd.startswith('QUERY'):
             if self.query_session():
                 self.wfile.write('TRUE ')

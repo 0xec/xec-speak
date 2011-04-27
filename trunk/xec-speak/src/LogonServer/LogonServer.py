@@ -34,18 +34,18 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
     
     def auth_logonuser(self, username, password):
         '''验证用户名和密码是否合法'''
-        self.db_host = read_conf_file('logonServer', 'dbsvr_host')
-        self.db_port = int(read_conf_file('logonServer', 'dbsvr_port'))
+        db_host = read_conf_file('logonServer', 'dbsvr_host')
+        db_port = int(read_conf_file('logonServer', 'dbsvr_port'))
         
-        self.dbconn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.dbconn.settimeout(2)
+        dbconn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        dbconn.settimeout(2)
 
-        self.dbconn.connect((self.db_host, self.db_port))
-        self.dbconn.send('LOGON%-32s%-32s' % (username, password))
-        self.uid = self.dbconn.recv(5)
-        self.dbconn.close()
+        dbconn.connect((db_host, db_port))
+        dbconn.send('LOGON%-32s%-32s' % (username, password))
+        uid = dbconn.recv(5)
+        dbconn.close()
         
-        return (self.uid != 'FAILD' and self.uid != None)  
+        return (uid != 'FAILD' and uid != None)  
     
     def make_session_key(self):
         '''生成 session key'''
@@ -55,18 +55,25 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         '''发送 session 到服务器'''
         data = 'PUTSS%-32s%-32s%-32s' % (session, usr, pwd)  
         
-        self.db_host = read_conf_file('logonServer', 'sessionsvr_host')
-        self.db_port = int(read_conf_file('logonServer', 'sessionsvr_port'))
+        session_host = read_conf_file('logonServer', 'sessionsvr_host')
+        session_port = int(read_conf_file('logonServer', 'sessionsvr_port'))
         
-        self.dbconn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.dbconn.settimeout(2)
+        session_svr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        session_svr.settimeout(2)
 
-        self.dbconn.connect((self.db_host, self.db_port))
-        self.dbconn.send(data)
-        ret = self.dbconn.recv(5)
-        self.dbconn.close()
+        session_svr.connect((session_host, session_port))
+        session_svr.send(data)
+        ret = session_svr.recv(5)
+        session_svr.close()
         
         return (ret == 'TRUE ')
+    
+    def send_session_to_client(self, session):
+        '''发送Session 和 Hall 服务器IP地址到 Client '''
+        hall_ip   = read_conf_file('logonServer', 'HallIP')
+        hall_port = int(read_conf_file('logonServer', 'HallPort'))
+        data = '%-5s%-32s%-32s%5d' % ('REPON', session, hall_ip, hall_port)
+        self.wfile.write(data)
         
     
     def handle(self):
@@ -88,9 +95,11 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
             session_key = self.make_session_key()               
             
             # put sesssion key to main server
-            self.put_session_to_server(session_key, usr, pwd)
+            if not self.put_session_to_server(session_key, usr, pwd):
+                return
             
             # send session, chat server to client
+            self.send_session_to_client(session_key)
            
             logger(__file__, 'requect process finish')
 
