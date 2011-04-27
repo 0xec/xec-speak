@@ -21,18 +21,18 @@ class SessionServer(SocketServer.StreamRequestHandler):
         
     def handle(self):  
         
-        cmd = self.rfile.read(5)            # 命令
-        
-        if cmd == None or len(cmd) == 0:
-            return
-        
-        if cmd.startswith('PUTSS'):         # 添加session到list
-            pass
-            
-        elif cmd.startswith('QUERY'):
-            pass
-        else:
-            pass
+#        cmd = self.rfile.read(5)            # 命令
+#        
+#        if cmd == None or len(cmd) == 0:
+#            return
+#        
+#        if cmd.startswith('PUTSS'):         # 添加session到list
+#            pass
+#            
+#        elif cmd.startswith('QUERY'):
+#            pass
+#        else:
+#            pass
                       
         logger(__file__, 'requect close')
             

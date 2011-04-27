@@ -6,6 +6,10 @@ sys.path.append('../')
 import SocketServer
 from common.xec_tcpsvr import *
 from common.logger import *
+import json
+
+json_enc = json.JSONEncoder()
+json_dec = json.JSONDecoder()
 
 listen_host = ''
 listen_port = 0
@@ -19,12 +23,12 @@ class SessionServer(SocketServer.StreamRequestHandler):
         self.disable_nagle_algorithm = True        
         SocketServer.StreamRequestHandler.__init__(self, request, client_address, server)
         
-    def put_session(self):
+    def put_session(self, req_info):
         global session_list
         
-        session_key = self.rfile.read(32).strip()
-        username    = self.rfile.read(32).strip()
-        password    = self.rfile.read(32).strip()
+        session_key = req_info['session']
+        username    = req_info['usr']
+        password    = req_info['pwd']
         
         logger(__file__, 'put session [%s:%s:%s]' % (session_key, username, password))
         
@@ -35,9 +39,9 @@ class SessionServer(SocketServer.StreamRequestHandler):
         
         session_list[session_key] = session_item
         
-    def query_session(self):
+    def query_session(self, req_info):
         
-        session_key = self.rfile.read(32).strip()
+        session_key = req_info['session']
         logger(__file__, 'query session [%s]' % (session_key))
         session_item = session_list[session_key]
         if session_item == None:
@@ -49,23 +53,31 @@ class SessionServer(SocketServer.StreamRequestHandler):
         
     def handle(self):  
         
-        cmd = self.rfile.read(5)            # 命令
-        
-        if cmd == None or len(cmd) == 0:
+        data = self.request.recv(1024)
+        if data == None or len(data) == 0:
             return
-        
-        if cmd.startswith('PUTSS'):         # 添加session到list
-            self.put_session()
-            self.wfile.write('TRUE ')
             
-        elif cmd.startswith('QUERY'):
-            if self.query_session():
-                self.wfile.write('TRUE ')
+        req_info = json_dec.decode(data)
+        
+        rep_info = {}
+        
+        if req_info['Request'] == 'put_session':         # 添加session到list
+            self.put_session(req_info)
+            
+            rep_info['Response'] = True
+            
+        elif req_info['Request'] == 'query_session':
+            
+            if self.query_session(req_info):
+                rep_info['Response'] = True
             else:
-                self.wfile.write('FALSE')
+                rep_info['Response'] = False
+            
         else:
             pass
-                      
+           
+        data = json_enc.encode(rep_info)
+        self.request.send(data)           
         logger(__file__, 'requect close')
             
     def finish(self):

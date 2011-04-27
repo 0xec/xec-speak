@@ -7,6 +7,11 @@ from common.xec_tcpsvr import *
 from common.logger import *
 import sqlite3.dbapi2 as sqlite
 
+import json
+
+json_enc = json.JSONEncoder()
+json_dec = json.JSONDecoder()
+
 listen_host = ''
 listen_port = 0
 
@@ -25,23 +30,30 @@ class DatabaseServer(SocketServer.StreamRequestHandler):
     def handle(self):
             
         try:
-            self.cmd = self.rfile.read(5)
-            if self.cmd == None or len(self.cmd) == 0:
+            data = self.request.recv(1024)
+            if data == None or len(data) == 0:
                 return
             
-            if self.cmd.startswith('LOGON'):
-                self.usr = self.rfile.read(32).strip()
-                self.pwd = self.rfile.read(32).strip()
+            req_info = json_dec.decode(data)
+            
+            if req_info['Request'] == 'Logon':
+                rep_info = {}
                 
-                logger(__file__, 'query usr[%s:%s]' % (self.usr, self.pwd))
+                logger(__file__, 'query usr[%s:%s]' % (req_info['usr'], req_info['pwd']))
                 
-                self.sql = 'SELECT uid, usr, pwd, pm from users where usr = \'%s\' and pwd = \'%s\'' % (self.usr, self.pwd)
+                self.sql = 'SELECT uid, usr, pwd, pm from users where usr = \'%s\' and pwd = \'%s\'' % (req_info['usr'], req_info['pwd'])
                 self.rs = self.dbconn.execute(self.sql)
                 self.line = self.rs.fetchone()
-                if self.line == None:
-                    self.wfile.write('FAILD')
+                if self.line != None:
+                    rep_info['Response'] = True
+                    rep_info['uid']      = self.line[0]
                 else:
-                    self.wfile.write('%-5d' % (self.line[0]))
+                    rep_info['Response'] = False
+                    rep_info['uid']      = None
+                
+                data = json_enc.encode(rep_info)
+                self.request.send(data)
+                    
             else:
                 pass
                 
