@@ -3,6 +3,7 @@
 
 from socket import *
 import json
+import time
 
 json_enc = json.JSONEncoder()
 json_dec = json.JSONDecoder()
@@ -16,6 +17,7 @@ if __name__ == '__main__':
         
         data = json_enc.encode(info)
 
+        # 登陆服务器
         s = socket(AF_INET, SOCK_STREAM)
         s.connect(('localhost', 8400) )
         s.send(data)
@@ -26,6 +28,7 @@ if __name__ == '__main__':
         
         info = {}
         
+        # 大厅服务器
         s = None
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((rep['HallHost'], rep['HallPort']))
@@ -37,8 +40,10 @@ if __name__ == '__main__':
         data = s.recv(1024)
         s.close
         rep = json_dec.decode(data)
-        for label in rep:
-            print label
-            print rep[label]
-        print rep
+        
+        # 连接到聊天室
+        chat_host = rep['client1']['host']
+        chat_port = rep['client1']['port']
+        
+        print 'connect to', chat_host, chat_port
         
