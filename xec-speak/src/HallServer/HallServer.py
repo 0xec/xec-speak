@@ -90,8 +90,6 @@ class SessionServer(SocketServer.StreamRequestHandler):
                     
                 data = json_enc.encode(rep_info)
                 self.request.send(data)
-               
-                logger(__file__, 'db process finish')
     
             except Exception, err:
                 self.request.close()
