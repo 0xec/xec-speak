@@ -1,5 +1,6 @@
-#Wed Apr 27 15:30:25 CST 2011
+#Thu Apr 28 16:30:25 CST 2011
 eclipse.preferences.version=1
+encoding//src/ChatServer/ChatServer.py=utf-8
 encoding//src/DBServer/DBServer.py=utf-8
 encoding//src/HallServer/HallServer.py=utf-8
 encoding//src/LogonServer/LogonServer.py=utf-8
