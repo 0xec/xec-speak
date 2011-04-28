@@ -4,12 +4,15 @@
 from socket import *
 import json
 import time
+import struct
 
 json_enc = json.JSONEncoder()
 json_dec = json.JSONDecoder()
 
 if __name__ == '__main__':
   #  for i in range(1, 999):  
+        Session_Key = None
+        
         info = {}
         info['usr'] = 'admin'
         info['pwd'] = 'admin888'
@@ -26,6 +29,8 @@ if __name__ == '__main__':
         rep = json_dec.decode(data)
         print rep
         
+        Session_Key = rep['Session']
+        
         info = {}
         
         # 大厅服务器
@@ -34,7 +39,7 @@ if __name__ == '__main__':
         s.connect((rep['HallHost'], rep['HallPort']))
         
         info['Request'] = 'ChatRoomList'
-        info['Session'] = rep['Session']
+        info['Session'] = Session_Key
         data = json_enc.encode(info)
         s.send(data)
         data = s.recv(1024)
@@ -46,4 +51,15 @@ if __name__ == '__main__':
         chat_port = rep['client1']['port']
         
         print 'connect to', chat_host, chat_port
+        
+        s = None
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect((chat_host, chat_port))        
+        
+        data = {}
+        data['Request'] = 'Broadcast'
+        data['Session'] = Session_Key
+        data['Data']    = b'\x30\xAA\xFC\AA'
+        print data
+        print json_enc.encode(data)
         
