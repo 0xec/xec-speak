@@ -4,6 +4,7 @@
 import sys
 sys.path.append('../')
 import SocketServer
+import socket
 from common.xec_tcpsvr import *
 from common.logger import *
 import json
@@ -31,7 +32,29 @@ class SessionServer(SocketServer.StreamRequestHandler):
             rep['client%d' % i]['host'] = '127.0.0.1'
             rep['client%d' % i]['port'] = 8404
             
-        return rep      
+        return rep     
+    
+    def check_session(self, session_key):
+        info = {}
+        info['Request'] = 'query_session'
+        info['session'] = session_key
+        
+        data = json_enc.encode(info)
+                
+        session_host = read_conf_file('logonServer', 'sessionsvr_host')
+        session_port = int(read_conf_file('logonServer', 'sessionsvr_port'))
+        
+        session_svr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        session_svr.settimeout(2)
+
+        session_svr.connect((session_host, session_port))
+        session_svr.send(data)
+        data_response = session_svr.recv(1024)
+        session_svr.close()
+                
+        rep = json_dec.decode(data_response)
+        
+        return (rep['Response'] == True)
         
         
     def handle(self):  
@@ -44,13 +67,25 @@ class SessionServer(SocketServer.StreamRequestHandler):
                 
                 req_info = json_dec.decode(data)
                 rep_info = {}
-                
-                if req_info['Request'] == 'ChatRoomList':
+
+                if req_info.has_key('Session') == False:
+                    rep_info['Response'] = False
+                    rep_info['info'] = 'no session'
                     
-                    rep_info = self.get_chat_rooms()
+                else:      
                     
-                else:
-                    pass
+                    if self.check_session(req_info['Session']):
+                              
+                        if req_info['Request'] == 'ChatRoomList':
+                            
+                            rep_info = self.get_chat_rooms()
+                            
+                        else:
+                            pass
+                    
+                    else:
+                        rep_info['Response'] = False
+                        rep_info['info'] = 'session error'
                     
                     
                 data = json_enc.encode(rep_info)
@@ -61,6 +96,8 @@ class SessionServer(SocketServer.StreamRequestHandler):
             except Exception, err:
                 self.request.close()
                 logger(__file__, str(err).decode('gbk'))
+                break
+            
         # end while
             
     def finish(self):
