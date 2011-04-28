@@ -31,6 +31,7 @@ if __name__ == '__main__':
         s.connect((rep['HallHost'], rep['HallPort']))
         
         info['Request'] = 'ChatRoomList'
+        info['Session'] = rep['Session']
         data = json_enc.encode(info)
         s.send(data)
         data = s.recv(1024)

@@ -43,10 +43,10 @@ class SessionServer(SocketServer.StreamRequestHandler):
         
         session_key = req_info['session']
         logger(__file__, 'query session [%s]' % (session_key))
-        session_item = session_list[session_key]
-        if session_item == None:
+        
+        if not session_list.has_key(session_key):
             return False
-        if session_key != session_item['key']:
+        if session_key != session_list[session_key]['key']:
             return False
         
         return True
