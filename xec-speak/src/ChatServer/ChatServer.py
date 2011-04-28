@@ -15,7 +15,7 @@ json_dec = json.JSONDecoder()
 listen_host = ''
 listen_port = 0
 
-session_list = {}
+client_list = {}
 
 class SessionServer(SocketServer.StreamRequestHandler):
     
@@ -44,9 +44,40 @@ class SessionServer(SocketServer.StreamRequestHandler):
         rep = json_dec.decode(data_response)
         
         return (rep['Response'] == True)
+    
+    def Add_Client(self, info):
+        '''添加一个连接到客户端链表'''
+        global client_list
+                
+        session_key = info['Session']
+        
+        client_list[session_key] = {}
+        client_list[session_key]['Request'] = self.request
+        
+    def Remove_Client(self):
+        '''删除一个客户端连接'''
+        global client_list
+        
+        for label in client_list.keys():
+            if client_list[label]['Request'] == self.request:
+                print 'Remove Session', label
+                del client_list[label]        
+    
+    def Broadcast_Data(self, info):
+        for item in client_list:
+            if client_list[item]['Request'] != self.request:
+                
+                rep_info = {}
+                rep_info['Response'] = True
+                rep_info['Info']     = 'Broadcast'
+                rep_info['Data']     = info['Data']
+                
+                data = json_enc.encode(rep_info)
+                client_list[item]['Request'].send(data)
         
         
-    def handle(self):  
+    def handle(self): 
+        global client_list 
         
         while True:
             try:
@@ -59,33 +90,43 @@ class SessionServer(SocketServer.StreamRequestHandler):
 
                 if req_info.has_key('Session') == False:
                     rep_info['Response'] = False
-                    rep_info['info'] = 'no session'
+                    rep_info['Info'] = 'no session'
                     
-                else:      
+                else:     
+                  
+                    # 保存连接
+                    self.Add_Client(req_info)
                     
                     if self.check_session(req_info['Session']):
                               
                         if req_info['Request'] == 'Broadcast':   # 请求命令
-                            pass                            
+                            
+                            self.Broadcast_Data(req_info)
+                            
+                            rep_info['Response'] = True
+                            rep_info['Info']     = 'Successfully'                           
                         else:
                             pass
                     
                     else:
                         rep_info['Response'] = False
-                        rep_info['info'] = 'session error'
+                        rep_info['Info'] = 'session error'
                     
                     
                 data = json_enc.encode(rep_info)
                 self.request.send(data)
     
             except Exception, err:
-                self.request.close()
+                             
+                self.request.close()                
                 logger(__file__, str(err).decode('gbk'))
                 break
             
         # end while
             
     def finish(self):
+        self.Remove_Client()
+                
         logger(__file__, 'client disconnect...')
         
 def main():
