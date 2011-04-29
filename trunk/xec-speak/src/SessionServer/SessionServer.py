@@ -39,7 +39,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
         
         session_list[session_key] = session_item
         
-    def query_session(self, req_info):
+    def query_session(self, req_info, rep_info):
         
         session_key = req_info['session']
         logger(__file__, 'query session [%s]' % (session_key))
@@ -48,6 +48,9 @@ class SessionServer(SocketServer.StreamRequestHandler):
             return False
         if session_key != session_list[session_key]['key']:
             return False
+        
+        session_item = session_list[session_key]
+        rep_info['Username'] = session_item['usr']
         
         return True
         
@@ -68,7 +71,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
             
         elif req_info['Request'] == 'query_session':
             
-            if self.query_session(req_info):
+            if self.query_session(req_info, rep_info):
                 rep_info['Response'] = True
             else:
                 rep_info['Response'] = False
