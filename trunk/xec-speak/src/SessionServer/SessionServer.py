@@ -3,7 +3,6 @@
 
 import sys
 sys.path.append('../')
-import SocketServer
 from common.xec_tcpsvr import *
 from common.logger import *
 import json
