@@ -120,6 +120,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
                         # 判断请求类型
                         if req_info['Request'] == 'Broadcast':   # 请求命令
                             
+                            # 广播消息
                             self.Broadcast_Data(req_info['Data'], session_key)
                             
                             rep_info['Response'] = True
@@ -127,6 +128,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
                             
                         elif req_info['Request'] == 'QueryUsers':
                             
+                            # 请求客户端链表
                             self.Query_Users(rep_info)
                             rep_info['Response'] = True
                             rep_info['Info']     = 'Users'   
