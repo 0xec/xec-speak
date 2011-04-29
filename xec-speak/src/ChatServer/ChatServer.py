@@ -24,6 +24,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
         SocketServer.StreamRequestHandler.__init__(self, request, client_address, server)
     
     def check_session(self, session_key):
+        '''验证 session 是否已经登录，返回登录状态和登录名'''
         info = {}
         info['Request'] = 'query_session'
         info['session'] = session_key
@@ -43,38 +44,48 @@ class SessionServer(SocketServer.StreamRequestHandler):
                 
         rep = json_dec.decode(data_response)
         
-        return (rep['Response'] == True)
+        return rep
     
-    def Add_Client(self, info):
+    def Add_Client(self, req_socket, session, username):
         '''添加一个连接到客户端链表'''
         global client_list
-                
-        session_key = info['Session']
+       
+        if not client_list.has_key(session):
+            client_list[session] = {}
+            client_list[session]['Request']  = req_socket
+            client_list[session]['Session']  = session
+            client_list[session]['Username'] = username
         
-        client_list[session_key] = {}
-        client_list[session_key]['Request'] = self.request
-        
-    def Remove_Client(self):
+    def Remove_Client(self, req_socket):
         '''删除一个客户端连接'''
         global client_list
         
-        for label in client_list.keys():
-            if client_list[label]['Request'] == self.request:
-                print 'Remove Session', label
-                del client_list[label]        
+        for session in client_list.keys():
+            if client_list[session]['Request'] == req_socket:
+                print 'Remove Session', session
+                del client_list[session]        
     
-    def Broadcast_Data(self, info):
-        for item in client_list:
-            if client_list[item]['Request'] != self.request:
+    def Broadcast_Data(self, data, session_key):
+        
+        for session in client_list:
+            if client_list[session]['Session'] != session_key:
                 
                 rep_info = {}
                 rep_info['Response'] = True
                 rep_info['Info']     = 'Broadcast'
-                rep_info['Data']     = info['Data']
+                rep_info['Username'] = client_list[session_key]['Username']
+                rep_info['Data']     = data
                 
                 data = json_enc.encode(rep_info)
-                client_list[item]['Request'].send(data)
+                client_list[session]['Request'].send(data)
+                
+    def Query_Users(self, rep):
         
+        loop = 0
+        rep['clients'] = {}
+        for session in client_list:
+            rep['clients'][loop] = client_list[session]['Username']
+            loop = loop + 1
         
     def handle(self): 
         global client_list 
@@ -88,23 +99,38 @@ class SessionServer(SocketServer.StreamRequestHandler):
                 req_info = json_dec.decode(data)
                 rep_info = {}
 
+                # 验证请求里是否有 session
                 if req_info.has_key('Session') == False:
                     rep_info['Response'] = False
                     rep_info['Info'] = 'no session'
                     
-                else:     
-                  
-                    # 保存连接
-                    self.Add_Client(req_info)
+                else:    
                     
-                    if self.check_session(req_info['Session']):
+                    # 客户 session
+                    session_key = req_info['Session']
+                         
+                    # 验证 session 是否合法
+                    chk_session = self.check_session(session_key)   
+                    
+                    if chk_session['Response'] == True:
+                        
+                        # 保存连接
+                        self.Add_Client(self.request, session_key, chk_session['Username'])   
                               
+                        # 判断请求类型
                         if req_info['Request'] == 'Broadcast':   # 请求命令
                             
-                            self.Broadcast_Data(req_info)
+                            self.Broadcast_Data(req_info['Data'], session_key)
                             
                             rep_info['Response'] = True
-                            rep_info['Info']     = 'Successfully'                           
+                            rep_info['Info']     = 'Broadcast'   
+                            
+                        elif req_info['Request'] == 'QueryUsers':
+                            
+                            self.Query_Users(rep_info)
+                            rep_info['Response'] = True
+                            rep_info['Info']     = 'Users'   
+                                              
                         else:
                             pass
                     
@@ -125,7 +151,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
         # end while
             
     def finish(self):
-        self.Remove_Client()
+        self.Remove_Client(self.request)
                 
         logger(__file__, 'client disconnect...')
         

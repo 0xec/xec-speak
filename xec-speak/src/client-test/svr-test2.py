@@ -15,7 +15,7 @@ if __name__ == '__main__':
         Session_Key = None
         
         info = {}
-        info['usr'] = 'admin'
+        info['usr'] = 'admin2'
         info['pwd'] = 'admin888'
         info['ver'] = 1.0
         
@@ -61,15 +61,16 @@ if __name__ == '__main__':
         while loop < 50:
             
             data = {}
-            data['Request'] = 'QueryUsers'
+            data['Request'] = 'Broadcast'
             data['Session'] = Session_Key
+            data['Data']    = base64.encodestring('\x30\xAA\xFC\AA')
             data = json_enc.encode(data)
             
             s.send(data)
             
             data = s.recv(1024)  
             print data  
-            time.sleep(3)    
+            time.sleep(5)    
             loop = loop + 1
         
         s.close()
