@@ -5,6 +5,7 @@ import sys
 sys.path.append('../')
 from common.xec_tcpsvr import *
 from common.logger import *
+from common.frame import *
 import sqlite3.dbapi2 as sqlite
 
 import json
@@ -68,6 +69,11 @@ class DatabaseServer(SocketServer.StreamRequestHandler):
         logger(__file__, 'db client disconnect...')
 
 def main():
+    global listen_host
+    global listen_port
+    
+    show_frame('DB Server')
+    
     logger(__file__, 'DB Server Starting....')
     
     # 读取配置文件
@@ -75,6 +81,9 @@ def main():
     listen_port = int(read_conf_file('DBServer', 'port'))
     
     start_listen_thread(DatabaseServer, listen_host, listen_port)
+    
+    main_loop()
+    
     logger(__file__, 'DB Server Exit.')
 
 if __name__ == '__main__':
