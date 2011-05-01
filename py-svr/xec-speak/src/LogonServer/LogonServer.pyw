@@ -4,6 +4,7 @@ import sys
 sys.path.append('../')
 from common.xec_tcpsvr import *
 from common.logger import *
+from common.frame import *
 import socket
 import md5
 import uuid
@@ -148,6 +149,8 @@ def main():
     global listen_host
     global listen_port
     
+    show_frame('Logon Server')
+    
     logger(__file__, 'Logon Server Starting....')
     
     # 读取配置文件
@@ -155,6 +158,9 @@ def main():
     listen_port = int(read_conf_file('logonServer', 'port'))
     
     start_listen_thread(LogonServerHandler, listen_host, listen_port)
+    
+    main_loop()
+    
     logger(__file__, 'Logon Server Exit.')
         
 if __name__ == '__main__':

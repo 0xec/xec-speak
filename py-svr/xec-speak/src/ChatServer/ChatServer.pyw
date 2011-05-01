@@ -6,6 +6,7 @@ sys.path.append('../')
 import socket
 from common.xec_tcpsvr import *
 from common.logger import *
+from common.frame import *
 import json
 
 json_enc = json.JSONEncoder()
@@ -157,6 +158,11 @@ class SessionServer(SocketServer.StreamRequestHandler):
         logger(__file__, 'client disconnect...')
         
 def main():
+    global listen_host
+    global listen_port
+    
+    show_frame('Chat Server')
+    
     logger(__file__, 'Chat Server Starting....')         # 
     
     # 
@@ -164,6 +170,9 @@ def main():
     listen_port = int(read_conf_file('ChatServer', 'port'))
     
     start_listen_thread(SessionServer, listen_host, listen_port)
+    
+    main_loop()
+    
     logger(__file__, 'Chat Server Exit.')
 
 if __name__ == '__main__':

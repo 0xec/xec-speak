@@ -5,6 +5,7 @@ import sys
 sys.path.append('../')
 from common.xec_tcpsvr import *
 from common.logger import *
+from common.frame import *
 import json
 
 json_enc = json.JSONEncoder()
@@ -86,6 +87,11 @@ class SessionServer(SocketServer.StreamRequestHandler):
         logger(__file__, 'client disconnect...')
         
 def main():
+    global listen_host
+    global listen_port
+    
+    show_frame('Session Server')
+    
     logger(__file__, 'Session Server Starting....')         # 日志
     
     # 读取配置文件
@@ -93,6 +99,9 @@ def main():
     listen_port = int(read_conf_file('SessionServer', 'port'))
     
     start_listen_thread(SessionServer, listen_host, listen_port)
+    
+    main_loop()
+    
     logger(__file__, 'Session Server Exit.')
 
 if __name__ == '__main__':
