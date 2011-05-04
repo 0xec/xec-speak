@@ -134,6 +134,8 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
             self.send_session_to_client(session_key)
            
             logger(__file__, 'requect process finish')
+            
+            self.request.close()
 
         except Exception, err:
             self.request.close()

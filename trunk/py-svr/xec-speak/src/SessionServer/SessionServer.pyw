@@ -19,6 +19,8 @@ session_list = {}
 class SessionServer(SocketServer.StreamRequestHandler):
     
     def __init__(self, request, client_address, server):
+        
+        logger(__file__, 'Server Socket __Init__')
         self.timeout = 2
         self.disable_nagle_algorithm = True        
         SocketServer.StreamRequestHandler.__init__(self, request, client_address, server)
@@ -58,6 +60,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
         
         data = self.request.recv(1024)
         if data == None or len(data) == 0:
+            logger(__file__, 'Handle No Data')
             return
             
         req_info = json_dec.decode(data)
@@ -65,15 +68,19 @@ class SessionServer(SocketServer.StreamRequestHandler):
         rep_info = {}
         
         if req_info['Request'] == 'put_session':         # Ìí¼Ósessionµ½list
+            logger(__file__, 'Handle Put Session')
             self.put_session(req_info)
             
             rep_info['Response'] = True
             
         elif req_info['Request'] == 'query_session':
             
+            logger(__file__, 'Handle Query Session')
             if self.query_session(req_info, rep_info):
+                logger(__file__, 'Handle Query Session Success')
                 rep_info['Response'] = True
             else:
+                logger(__file__, 'Handle Query Session Failed')
                 rep_info['Response'] = False
             
         else:
@@ -81,10 +88,12 @@ class SessionServer(SocketServer.StreamRequestHandler):
            
         data = json_enc.encode(rep_info)
         self.request.send(data)           
-        logger(__file__, 'requect close')
+        self.request.close()
+        logger(__file__, 'requect finish')
             
     def finish(self):
-        logger(__file__, 'client disconnect...')
+        self.request.close()
+        logger(__file__, 'Socket Server Finish...')
         
 def main():
     global listen_host

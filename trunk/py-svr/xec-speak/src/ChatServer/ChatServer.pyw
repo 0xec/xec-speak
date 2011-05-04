@@ -55,6 +55,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
             client_list[session]['Request']  = req_socket
             client_list[session]['Session']  = session
             client_list[session]['Username'] = username
+            logger(__file__, 'Add a new Client')
         
     def Remove_Client(self, req_socket):
         '''删除一个客户端连接'''
@@ -63,7 +64,8 @@ class SessionServer(SocketServer.StreamRequestHandler):
         for session in client_list.keys():
             if client_list[session]['Request'] == req_socket:
                 print 'Remove Session', session
-                del client_list[session]        
+                del client_list[session]  
+                logger(__file__, 'Remove a client')      
     
     def Broadcast_Data(self, data, session_key):
         
@@ -78,6 +80,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
                 
                 data = json_enc.encode(rep_info)
                 client_list[session]['Request'].send(data)
+                logger(__file__, 'broadcast data')
                 
     def Query_Users(self, rep):
         
@@ -86,6 +89,8 @@ class SessionServer(SocketServer.StreamRequestHandler):
         for session in client_list:
             rep['clients'][loop] = client_list[session]['Username']
             loop = loop + 1
+            
+        logger(__file__, 'request query users')
         
     def handle(self): 
         global client_list 
@@ -94,6 +99,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
             try:
                 data = self.request.recv(1024)
                 if data == None or len(data) == 0:
+                    logger(__file__, 'Recv No Data')
                     return
                 
                 req_info = json_dec.decode(data)
@@ -103,6 +109,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
                 if req_info.has_key('Session') == False:
                     rep_info['Response'] = False
                     rep_info['Info'] = 'no session'
+                    logger(__file__, 'Request do not have session key')
                     
                 else:    
                     
@@ -137,6 +144,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
                             pass
                     
                     else:
+                        logger(__file__, 'request session wrong')
                         rep_info['Response'] = False
                         rep_info['Info'] = 'session error'
                     
@@ -153,9 +161,8 @@ class SessionServer(SocketServer.StreamRequestHandler):
         # end while
             
     def finish(self):
-        self.Remove_Client(self.request)
-                
-        logger(__file__, 'client disconnect...')
+        self.Remove_Client(self.request) 
+        logger(__file__, 'socket server finish...')
         
 def main():
     global listen_host
