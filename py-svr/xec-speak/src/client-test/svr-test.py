@@ -52,14 +52,16 @@ if __name__ == '__main__':
         chat_host = rep['client1']['host']
         chat_port = rep['client1']['port']
         
-        print 'connect to', chat_host, chat_port
-        
-        s = None
-        s = socket(AF_INET, SOCK_STREAM)
-        s.connect((chat_host, chat_port))    
-        
         loop = 0
-        while loop < 50:
+        while True:
+            
+            print 'connect to', chat_host, chat_port
+                    
+            s = None
+            s = socket(AF_INET, SOCK_STREAM)
+            s.connect((chat_host, chat_port))    
+            
+            print 'connected'
             
             data = {}
             data['Request'] = 'QueryUsers'
@@ -68,10 +70,16 @@ if __name__ == '__main__':
             
             s.send(data)
             
+            print 'sent'
+            
             data = s.recv(1024)  
             print data  
-            time.sleep(3)    
+            
+            print 'recved'  
+            
+            s.close()
+            time.sleep(1)
+            
             loop = loop + 1
-        
-        s.close()
+
         

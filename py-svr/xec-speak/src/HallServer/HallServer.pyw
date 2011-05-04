@@ -98,8 +98,10 @@ class SessionServer(SocketServer.StreamRequestHandler):
                 break
             
         # end while
+        self.request.close()
             
     def finish(self):
+        self.request.close()
         logger(__file__, 'client disconnect...')
         
 def main():

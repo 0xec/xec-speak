@@ -23,8 +23,6 @@ class DatabaseServer(SocketServer.StreamRequestHandler):
     def __init__(self, request, client_address, server):
         self.timeout = 2
         self.disable_nagle_algorithm = True   
-        self.dbconn  = sqlite.connect(db_file)
-        self.dbconn.cursor()   
         SocketServer.StreamRequestHandler.__init__(self, request, client_address, server)
         
         
@@ -40,6 +38,9 @@ class DatabaseServer(SocketServer.StreamRequestHandler):
             if req_info['Request'] == 'Logon':
                 rep_info = {}
                 
+                self.dbconn  = sqlite.connect(db_file)
+                self.dbconn.cursor()   
+                
                 logger(__file__, 'query usr[%s:%s]' % (req_info['usr'], req_info['pwd']))
                 
                 self.sql = 'SELECT uid, usr, pwd, pm from users where usr = \'%s\' and pwd = \'%s\'' % (req_info['usr'], req_info['pwd'])
@@ -54,12 +55,15 @@ class DatabaseServer(SocketServer.StreamRequestHandler):
                 
                 data = json_enc.encode(rep_info)
                 self.request.send(data)
+                
+                self.dbconn.close()
                     
             else:
                 pass
                 
            
             logger(__file__, 'db process finish')
+            self.request.close()
 
         except Exception, err:
             self.request.close()
