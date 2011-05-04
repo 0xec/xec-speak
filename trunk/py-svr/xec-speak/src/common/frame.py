@@ -16,7 +16,7 @@ class mainFrame(wxFrame):
         self.Bind(EVT_CLOSE, self.OnClose, self)
         wxFrame.Centre(self)
         
-    def OnClose(self):
+    def OnClose(self, event):
         sys.exit(1)
 
 class theApp(wxApp):
