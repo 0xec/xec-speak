@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding=utf-8
+#coding=gbk
 
 from socket import *
 import json
@@ -21,11 +21,12 @@ if __name__ == '__main__':
         
         data = json_enc.encode(info)
 
-        # ç™»é™†æœåŠ¡å™¨
+        # µÇÂ½·şÎñÆ÷
         s = socket(AF_INET, SOCK_STREAM)
         s.connect(('localhost', 8400) )
         s.send(data)
         data = s.recv(1024)
+        print data
         s.close
         rep = json_dec.decode(data)
         print rep
@@ -34,7 +35,7 @@ if __name__ == '__main__':
         
         info = {}
         
-        # å¤§å…æœåŠ¡å™¨
+        # ´óÌü·şÎñÆ÷
         s = None
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((rep['HallHost'], rep['HallPort']))
@@ -47,7 +48,7 @@ if __name__ == '__main__':
         s.close
         rep = json_dec.decode(data)
         
-        # è¿æ¥åˆ°èŠå¤©å®¤
+        # Á¬½Óµ½ÁÄÌìÊÒ
         chat_host = rep['client1']['host']
         chat_port = rep['client1']['port']
         

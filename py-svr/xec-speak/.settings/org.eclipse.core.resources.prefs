@@ -1,11 +1,14 @@
-#Sun May 01 16:37:52 CST 2011
+#Wed May 04 11:27:39 CST 2011
 eclipse.preferences.version=1
-encoding//src/ChatServer/ChatServer.pyw=utf-8
-encoding//src/DBServer/DBServer.pyw=utf-8
-encoding//src/HallServer/HallServer.pyw=utf-8
-encoding//src/LogonServer/LogonServer.pyw=utf-8
-encoding//src/SessionServer/SessionServer.pyw=utf-8
-encoding//src/client-test/json-test.py=utf-8
-encoding//src/client-test/svr-test.py=utf-8
-encoding//src/common/frame.py=utf-8
-encoding//src/common/xec_tcpsvr.py=utf-8
+encoding//src/ChatServer/ChatServer.pyw=gbk
+encoding//src/DBServer/DBServer.pyw=gbk
+encoding//src/HallServer/HallServer.pyw=gbk
+encoding//src/LogonServer/LogonServer.pyw=gbk
+encoding//src/SessionServer/SessionServer.pyw=gbk
+encoding//src/client-test/json-test.py=gbk
+encoding//src/client-test/svr-test.py=gbk
+encoding//src/client-test/svr-test2.py=gbk
+encoding//src/client-test/svr-test3.py=gbk
+encoding//src/common/frame.py=gbk
+encoding//src/common/logger.py=gbk
+encoding//src/common/xec_tcpsvr.py=gbk

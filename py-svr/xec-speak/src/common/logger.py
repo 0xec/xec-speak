@@ -1,8 +1,6 @@
-'''
-Created on 2011-4-26
+#!/usr/bin/env python
+#coding=gbk
 
-@author: xec
-'''
 import threading
 import os
 import frame

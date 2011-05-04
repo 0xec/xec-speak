@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding=utf-8
+#coding=gbk
 
 import sys
 sys.path.append('../')
@@ -64,7 +64,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
         
         rep_info = {}
         
-        if req_info['Request'] == 'put_session':         # 娣诲姞session鍒發ist
+        if req_info['Request'] == 'put_session':         # 添加session到list
             self.put_session(req_info)
             
             rep_info['Response'] = True
@@ -92,9 +92,9 @@ def main():
     
     show_frame('Session Server')
     
-    logger(__file__, 'Session Server Starting....')         # 鏃ュ織
+    logger(__file__, 'Session Server Starting....')         # 日志
     
-    # 璇诲彇閰嶇疆鏂囦欢
+    # 读取配置文件
     listen_host = read_conf_file('SessionServer', 'host')
     listen_port = int(read_conf_file('SessionServer', 'port'))
     

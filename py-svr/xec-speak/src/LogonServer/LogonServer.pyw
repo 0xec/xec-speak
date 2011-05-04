@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding=utf-8
+#coding=gbk
 import sys
 sys.path.append('../')
 from common.xec_tcpsvr import *
@@ -37,7 +37,7 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         return ret
     
     def auth_logonuser(self, username, password):
-        '''éªŒè¯ç”¨æˆ·åå’Œå¯†ç æ˜¯å¦åˆæ³•'''
+        '''ÑéÖ¤ÓÃ»§ÃûºÍÃÜÂëÊÇ·ñºÏ·¨'''
         db_host = read_conf_file('logonServer', 'dbsvr_host')
         db_port = int(read_conf_file('logonServer', 'dbsvr_port'))
         
@@ -61,11 +61,11 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         return (DB_Response['Response'] == True and DB_Response['uid'] != None)  
     
     def make_session_key(self):
-        '''ç”Ÿæˆ session key'''
+        '''Éú³É session key'''
         return uuid.uuid1().get_hex()
     
     def put_session_to_server(self, session, usr, pwd):
-        '''å‘é€ session åˆ°æœåŠ¡å™¨'''
+        '''·¢ËÍ session µ½·şÎñÆ÷'''
         info = {}
         info['Request'] = 'put_session'
         info['session'] = session
@@ -90,7 +90,7 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
         return (rep['Response'] == True)
     
     def send_session_to_client(self, session):
-        '''å‘é€Session å’Œ Hall æœåŠ¡å™¨IPåœ°å€åˆ° Client '''
+        '''·¢ËÍSession ºÍ Hall ·şÎñÆ÷IPµØÖ·µ½ Client '''
         hall_ip   = read_conf_file('logonServer', 'HallIP')
         hall_port = int(read_conf_file('logonServer', 'HallPort'))
         
@@ -115,7 +115,7 @@ class LogonServerHandler(SocketServer.StreamRequestHandler):
             
             logger(__file__, 'request accept : %s:%d' % (self.client_address[0], self.client_address[1]))
                 
-            # éªŒè¯è´¦æˆ·å¯†ç 
+            # ÑéÖ¤ÕË»§ÃÜÂë
             usr = request_info['usr']
             pwd = request_info['pwd']
             
@@ -153,7 +153,7 @@ def main():
     
     logger(__file__, 'Logon Server Starting....')
     
-    # è¯»å–é…ç½®æ–‡ä»¶
+    # ¶ÁÈ¡ÅäÖÃÎÄ¼ş
     listen_host = read_conf_file('logonServer', 'host')
     listen_port = int(read_conf_file('logonServer', 'port'))
     

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding=utf-8
+#coding=gbk
 
 import sys
 sys.path.append('../')
@@ -24,7 +24,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
         SocketServer.StreamRequestHandler.__init__(self, request, client_address, server)
     
     def check_session(self, session_key):
-        '''éªŒè¯ session æ˜¯å¦å·²ç»ç™»å½•ï¼Œè¿”å›ç™»å½•çŠ¶æ€å’Œç™»å½•å'''
+        '''ÑéÖ¤ session ÊÇ·ñÒÑ¾­µÇÂ¼£¬·µ»ØµÇÂ¼×´Ì¬ºÍµÇÂ¼Ãû'''
         info = {}
         info['Request'] = 'query_session'
         info['session'] = session_key
@@ -47,7 +47,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
         return rep
     
     def Add_Client(self, req_socket, session, username):
-        '''æ·»åŠ ä¸€ä¸ªè¿æ¥åˆ°å®¢æˆ·ç«¯é“¾è¡¨'''
+        '''Ìí¼ÓÒ»¸öÁ¬½Óµ½¿Í»§¶ËÁ´±í'''
         global client_list
        
         if not client_list.has_key(session):
@@ -57,7 +57,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
             client_list[session]['Username'] = username
         
     def Remove_Client(self, req_socket):
-        '''åˆ é™¤ä¸€ä¸ªå®¢æˆ·ç«¯è¿æ¥'''
+        '''É¾³ıÒ»¸ö¿Í»§¶ËÁ¬½Ó'''
         global client_list
         
         for session in client_list.keys():
@@ -99,28 +99,28 @@ class SessionServer(SocketServer.StreamRequestHandler):
                 req_info = json_dec.decode(data)
                 rep_info = {}
 
-                # éªŒè¯è¯·æ±‚é‡Œæ˜¯å¦æœ‰ session
+                # ÑéÖ¤ÇëÇóÀïÊÇ·ñÓĞ session
                 if req_info.has_key('Session') == False:
                     rep_info['Response'] = False
                     rep_info['Info'] = 'no session'
                     
                 else:    
                     
-                    # å®¢æˆ· session
+                    # ¿Í»§ session
                     session_key = req_info['Session']
                          
-                    # éªŒè¯ session æ˜¯å¦åˆæ³•
+                    # ÑéÖ¤ session ÊÇ·ñºÏ·¨
                     chk_session = self.check_session(session_key)   
                     
                     if chk_session['Response'] == True:
                         
-                        # ä¿å­˜è¿æ¥
+                        # ±£´æÁ¬½Ó
                         self.Add_Client(self.request, session_key, chk_session['Username'])   
                               
-                        # åˆ¤æ–­è¯·æ±‚ç±»å‹
-                        if req_info['Request'] == 'Broadcast':   # è¯·æ±‚å‘½ä»¤
+                        # ÅĞ¶ÏÇëÇóÀàĞÍ
+                        if req_info['Request'] == 'Broadcast':   # ÇëÇóÃüÁî
                             
-                            # å¹¿æ’­æ¶ˆæ¯
+                            # ¹ã²¥ÏûÏ¢
                             self.Broadcast_Data(req_info['Data'], session_key)
                             
                             rep_info['Response'] = True
@@ -128,7 +128,7 @@ class SessionServer(SocketServer.StreamRequestHandler):
                             
                         elif req_info['Request'] == 'QueryUsers':
                             
-                            # è¯·æ±‚å®¢æˆ·ç«¯é“¾è¡¨
+                            # ÇëÇó¿Í»§¶ËÁ´±í
                             self.Query_Users(rep_info)
                             rep_info['Response'] = True
                             rep_info['Info']     = 'Users'   
