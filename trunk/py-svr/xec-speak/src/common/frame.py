@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-#coding=utf-8
+#coding=gbk
+
 import sys
 import os
 from wxPython.wx import *
@@ -12,7 +13,11 @@ class mainFrame(wxFrame):
         wxFrame.__init__(self, None, wxID_ANY, title, wxDefaultPosition, wxSize(600, 300))
      #   self.Panel = wxPanel(self, wxID_ANY)
         self.textCtrl = wxTextCtrl(self, pos=wxDefaultPosition, size=wxDefaultSize, style=wxTE_MULTILINE)
+        self.Bind(EVT_CLOSE, self.OnClose, self)
         wxFrame.Centre(self)
+        
+    def OnClose(self):
+        sys.exit(1)
 
 class theApp(wxApp):
     

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding=utf-8
+#coding=gbk
 
 import sys
 sys.path.append('../')
@@ -108,9 +108,9 @@ def main():
     
     show_frame('Hall Server')
     
-    logger(__file__, 'Hall Server Starting....')         # 鏃ュ織
+    logger(__file__, 'Hall Server Starting....')         # 日志
     
-    # 璇诲彇閰嶇疆鏂囦欢
+    # 读取配置文件
     listen_host = read_conf_file('HallServer', 'host')
     listen_port = int(read_conf_file('HallServer', 'port'))
     

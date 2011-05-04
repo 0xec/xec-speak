@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding=utf-8
+#coding=gbk
 
 import sys
 sys.path.append('../')
@@ -76,7 +76,7 @@ def main():
     
     logger(__file__, 'DB Server Starting....')
     
-    # è¯»å–é…ç½®æ–‡ä»¶
+    # ¶ÁÈ¡ÅäÖÃÎÄ¼ş
     listen_host = read_conf_file('DBServer', 'host')
     listen_port = int(read_conf_file('DBServer', 'port'))
     

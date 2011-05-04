@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding=utf-8
+#coding=gbk
 
 import os
 import SocketServer
@@ -13,7 +13,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
 def read_conf_file(section, label):
-    '''è¯»å–é…ç½®æ–‡ä»¶'''
+    '''¶ÁÈ¡ÅäÖÃÎÄ¼ş'''
     global listen_host
     global listen_port
     global config_file
@@ -24,7 +24,7 @@ def read_conf_file(section, label):
     return cf.get(section, label)
 
 def start_listen_thread(ServerHandler, host, port):
-    '''å¯åŠ¨æœåŠ¡å™¨çº¿ç¨‹'''
+    '''Æô¶¯·şÎñÆ÷Ïß³Ì'''
     global server
     
     logger(__file__, 'Server Work ' + host + ':' + str(port))
